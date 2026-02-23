@@ -2,67 +2,90 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Cinematic Birthday Surprise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Surprise</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
-body{
+html,body{
   margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
   background:black;
   color:gold;
-  text-align:center;
   font-family:Arial, sans-serif;
-  overflow-x:hidden;
+  overflow:hidden;
 }
-.container{padding:30px;}
+
+.screen{
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+}
+
 input,button{
   padding:12px;
   margin:10px;
   font-size:16px;
-  border-radius:8px;
+  border-radius:10px;
   border:none;
 }
+
 button{
   background:gold;
   color:black;
-  cursor:pointer;
+  font-weight:bold;
 }
+
 .meter{
   width:80%;
   height:25px;
   background:#333;
-  margin:auto;
   border-radius:20px;
+  overflow:hidden;
 }
+
 .meter-fill{
   height:100%;
   width:0%;
   background:gold;
-  border-radius:20px;
 }
+
 .card{
-  display:inline-block;
   background:#222;
-  padding:20px;
+  padding:15px;
   margin:10px;
   border-radius:10px;
-  cursor:pointer;
   width:120px;
 }
+
 footer{
-  margin-top:40px;
+  position:fixed;
+  bottom:10px;
+  width:100%;
+  text-align:center;
   color:white;
+  font-size:14px;
 }
 </style>
 </head>
+
 <body>
 
-<div class="container" id="main">
-<h2>🎁 Who is the Birthday Legend?</h2>
+<div class="screen" id="main">
+
+<h2>🎁 Enter Birthday Legend</h2>
 <input type="text" id="name" placeholder="Enter Name">
-<br>
-  <input type="number" id="age" placeholder="Enter Age">
-<br>
-<button onclick="generateLink()">Generate Surprise Link 🔗</button>
+<input type="number" id="age" placeholder="Enter Age">
+<button onclick="generateLink()">Generate Wish Link 🔗</button>
+<p id="result"></p>
+
 </div>
 
 <footer>
@@ -77,34 +100,42 @@ function speak(text){
   window.speechSynthesis.speak(speech);
 }
 
-// 🔹 Read URL
-const params = new URLSearchParams(window.location.search);
-const urlName = params.get("name");
-const urlAge = params.get("age");
+const params=new URLSearchParams(window.location.search);
+const urlName=params.get("name");
+const urlAge=params.get("age");
 
 if(urlName && urlAge){
-  setTimeout(()=>startCinematic(urlName,urlAge),500);
+  setTimeout(()=>start(urlName,urlAge),500);
 }
 
 function generateLink(){
-  let name=document.getElementById("name").value;
-  let age=document.getElementById("age").value;
+  let name=document.getElementById("name").value.trim();
+  let age=document.getElementById("age").value.trim();
 
   if(name=="" || age==""){
     alert("Enter name and age da!");
     return;
   }
 
-  let link=window.location.origin + window.location.pathname +
+  let link=window.location.origin+window.location.pathname+
   "?name="+encodeURIComponent(name)+"&age="+encodeURIComponent(age);
 
-  document.getElementById("main").innerHTML=
-  "<h2>Share this Surprise Link 🔗</h2>"+
-  "<input style='width:80%' value='"+link+"' readonly><br><br>"+
-  "<button onclick='window.open(\"https://wa.me/?text=Open this Birthday Surprise 🔥👉 "+link+"\")'>Share on WhatsApp</button>";
+  document.getElementById("result").innerHTML=
+  "<input style='width:90%' value='"+link+"' readonly><br><br>"+
+  "<button onclick='copyLink(\""+link+"\")'>Copy</button><br><br>"+
+  "<button onclick='shareLink(\""+link+"\")'>WhatsApp Share</button>";
 }
 
-function startCinematic(name,age){
+function copyLink(link){
+  navigator.clipboard.writeText(link);
+  alert("Link copied 🔥");
+}
+
+function shareLink(link){
+  window.open("https://wa.me/?text=Open this Birthday Surprise 🔥👉 "+link);
+}
+
+function start(name,age){
   countdown(name,age);
 }
 
@@ -123,17 +154,17 @@ function countdown(name,age){
 
 function showGift(name,age){
   document.getElementById("main").innerHTML=
-  "<div style='font-size:100px;cursor:pointer;' onclick='openGift(\""+name+"\",\""+age+"\")'>🎁</div>"+
-  "<p>Open the Gift</p>";
+  "<div style='font-size:100px;' onclick='openGift(\""+name+"\",\""+age+"\")'>🎁</div>"+
+  "<p>Tap Gift</p>";
 }
 
 function openGift(name,age){
   speak("Atula onum illa daaa!");
   document.getElementById("main").innerHTML="<h1>😂 Atula Onum Illa!</h1>";
-  setTimeout(()=>friendshipMeter(name,age),3000);
+  setTimeout(()=>friendship(name,age),3000);
 }
 
-function friendshipMeter(name,age){
+function friendship(name,age){
   document.getElementById("main").innerHTML=
   "<h2>Friendship Level</h2>"+
   "<div class='meter'><div class='meter-fill' id='fill'></div></div>"+
@@ -146,56 +177,46 @@ function friendshipMeter(name,age){
     document.getElementById("percent").innerHTML=percent+"%";
     if(percent>=95){
       clearInterval(interval);
-      setTimeout(()=>showScratch(name,age),1000);
+      setTimeout(()=>scratch(name,age),1000);
     }
   },20);
 }
 
-function showScratch(name,age){
+function scratch(name,age){
   document.getElementById("main").innerHTML=
-  "<h2>Scratch a Gift 🎟️</h2>"+
-  "<div class='card' onclick='revealGift(this,\""+name+"\",\""+age+"\")'>🎁 Gift 1</div>"+
-  "<div class='card' onclick='revealGift(this,\""+name+"\",\""+age+"\")'>🎁 Gift 2</div>"+
-  "<div class='card' onclick='revealGift(this,\""+name+"\",\""+age+"\")'>🎁 Gift 3</div>"+
-  "<div class='card' onclick='revealGift(this,\""+name+"\",\""+age+"\")'>🎁 Gift 4</div>";
+  "<h2>Pick a Gift 🎟️</h2>"+
+  "<div class='card' onclick='reveal(this,\""+name+"\",\""+age+"\")'>🎁 1</div>"+
+  "<div class='card' onclick='reveal(this,\""+name+"\",\""+age+"\")'>🎁 2</div>"+
+  "<div class='card' onclick='reveal(this,\""+name+"\",\""+age+"\")'>🎁 3</div>"+
+  "<div class='card' onclick='reveal(this,\""+name+"\",\""+age+"\")'>🎁 4</div>";
 }
 
-function revealGift(card,name,age){
+function reveal(card,name,age){
   const gifts=[
     "Old Geometry Box 😂",
     "Expired Chocolate 🍫",
-    "Unlimited Tea Treat ☕",
+    "Tea Treat Coupon ☕",
     "Maturity Update Loading 🤣"
   ];
   card.innerHTML=gifts[Math.floor(Math.random()*gifts.length)];
-  setTimeout(()=>finalReveal(name,age),2000);
+  setTimeout(()=>final(name,age),2000);
 }
 
-function finalReveal(name,age){
-
+function final(name,age){
   const roasts=[
-    name+" "+age+" vayasu aachu... brain still buffering 😂",
-    age+" aachu... still amma baby dhaan 😎",
-    name+" ku cake vida filter coffee strong 🤣"
+    name+" "+age+" vayasu... brain buffering 😂",
+    age+" aachu... amma baby dhaan 😎",
+    name+" ku cake vida filter strong 🤣"
   ];
-
   let roast=roasts[Math.floor(Math.random()*roasts.length)];
 
   document.getElementById("main").innerHTML=
   "<h1>🎉 HAPPY BIRTHDAY "+name+" 🎉</h1>"+
   "<h3>"+roast+"</h3>"+
-  "<button onclick='share()'>Share Again 🔗</button>";
+  "<button onclick='shareLink(window.location.href)'>Share 🔗</button>";
 
   speak("Happy Birthday "+name);
-  confetti({
-    particleCount:150,
-    spread:100
-  });
-}
-
-function share(){
-  let url=window.location.href;
-  window.open("https://wa.me/?text=See this Birthday Surprise 🔥👉 "+url);
+  confetti({particleCount:200,spread:120});
 }
 
 </script>
